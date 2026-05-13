@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Расчет физической подготовленности</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --line: #d7dde6;
+      --text: #17202c;
+      --muted: #657286;
+      --accent: #9a0105;
+      --accent-dark: #790104;
+      --danger: #b42318;
+      --danger-bg: #fff1f0;
+      --field: #fbfcfe;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    header {
+      background: #1c2733;
+      color: #fff;
+      padding: 18px 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 650;
+    }
+
+    main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 22px 24px 40px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 18px;
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(180px, 240px) auto auto auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .student-actions {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(140px, 200px) auto;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: end;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(135px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--field);
+      color: var(--text);
+      padding: 7px 9px;
+      font: inherit;
+    }
+
+    button {
+      min-height: 36px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      background: #eef2f7;
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    button.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #f3b8b3;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .result {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-left: 4px solid var(--accent);
+      background: #fff1f1;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      background: #f8fafc;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .message {
+      min-height: 20px;
+      margin-top: 10px;
+      color: var(--muted);
+    }
+
+    .message.error {
+      color: var(--danger);
+    }
+
+    @media (max-width: 1100px) {
+      .toolbar,
+      .student-actions,
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 16px;
+      }
+
+      main {
+        padding: 16px;
+      }
+
+      .toolbar,
+      .student-actions,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Расчет показателя физической подготовленности студента</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>Студенты</h2>
+      <div class="toolbar">
+        <label>
+          Студент
+          <select id="studentSelect"></select>
+        </label>
+        <button class="secondary" id="refreshBtn" type="button">Обновить</button>
+        <button class="danger" id="deleteStudentBtn" type="button">Удалить студента</button>
+        <button class="primary" id="predictBtn" type="button" style="display: none;">Рассчитать показатель</button>
+        <span class="pill" id="readyPill">Нет данных</span>
+      </div>
+
+      <div class="student-actions">
+        <label>
+          ФИО студента
+          <input id="newStudentName" type="text" placeholder="Иванов Иван" />
+        </label>
+        <label>
+          Группа
+          <input id="newStudentGroup" type="text" placeholder="ФК-101" />
+        </label>
+        <button class="primary" id="addStudentBtn" type="button">Добавить студента</button>
+      </div>
+
+      <div class="status-row">
+        <span id="statusText">Выберите студента</span>
+      </div>
+      <div class="result" id="resultBox"></div>
+      <div class="message" id="message"></div>
+    </section>
+
+    <section>
+      <h2>Новая запись наблюдения</h2>
+      <form id="recordForm" class="form-grid">
+        <label>Дата <input name="date" type="date" required /></label>
+        <label>Возраст <input name="age" type="number" min="1" max="120" value="20" required /></label>
+        <label>Пол
+          <select name="gender" required>
+            <option value="F">Женский</option>
+            <option value="M">Мужской</option>
+          </select>
+        </label>
+        <label>Рост, см <input name="height_cm" type="number" step="0.1" value="175" required /></label>
+        <label>Вес, кг <input name="weight_kg" type="number" step="0.1" value="70" required /></label>
+        <label>Активность
+          <select name="activity_type" required>
+            <option value="Basketball">Баскетбол</option>
+            <option value="Cycling">Велоспорт</option>
+            <option value="Dancing">Танцы</option>
+            <option value="HIIT">Интервальная тренировка</option>
+            <option value="Running">Бег</option>
+            <option value="Swimming">Плавание</option>
+            <option value="Tennis">Теннис</option>
+            <option value="Walking">Ходьба</option>
+            <option value="Weight Training">Силовая тренировка</option>
+            <option value="Yoga">Йога</option>
+          </select>
+        </label>
+        <label>Длительность, мин <input name="duration_minutes" type="number" min="0" value="45" required /></label>
+        <label>Интенсивность
+          <select name="intensity" required>
+            <option value="Low">Низкая</option>
+            <option value="Medium">Средняя</option>
+            <option value="High">Высокая</option>
+          </select>
+        </label>
+        <label>Калории <input name="calories_burned" type="number" step="0.1" value="8.0" required /></label>
+        <label>Средний пульс <input name="avg_heart_rate" type="number" value="120" required /></label>
+        <label>Сон, часы <input name="hours_sleep" type="number" step="0.1" value="7.0" required /></label>
+        <label>Стресс <input name="stress_level" type="number" min="1" max="10" value="5" required /></label>
+        <label>Шаги <input name="daily_steps" type="number" value="8000" required /></label>
+        <label>Гидратация <input name="hydration_level" type="number" step="0.1" value="2.0" required /></label>
+        <label>Индекс массы тела <input name="bmi" type="number" step="0.1" value="22.5" required /></label>
+        <label>Пульс покоя <input name="resting_heart_rate" type="number" step="0.1" value="70" required /></label>
+        <label>Давление верхнее <input name="blood_pressure_systolic" type="number" step="0.1" value="120" required /></label>
+        <label>Давление нижнее <input name="blood_pressure_diastolic" type="number" step="0.1" value="80" required /></label>
+        <label>Состояние здоровья
+          <select name="health_condition">
+            <option value="">Нет</option>
+            <option value="Asthma">Астма</option>
+            <option value="Diabetes">Диабет</option>
+            <option value="Hypertension">Гипертония</option>
+          </select>
+        </label>
+        <label>Курение
+          <select name="smoking_status" required>
+            <option value="Never">Не курит</option>
+            <option value="Former">Бросил(а)</option>
+            <option value="Current">Курит</option>
+          </select>
+        </label>
+        <label>Текущий fitness_level <input name="fitness_level" type="number" step="0.01" value="5.00" required /></label>
+        <button class="primary" id="addRecordBtn" type="submit">Добавить запись в базу</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Записи выбранного студента</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Активность</th>
+              <th>Мин.</th>
+              <th>Интенсивность</th>
+              <th>Шаги</th>
+              <th>Вес</th>
+              <th>fitness_level</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const studentSelect = document.querySelector("#studentSelect");
+    const recordsBody = document.querySelector("#recordsBody");
+    const statusText = document.querySelector("#statusText");
+    const readyPill = document.querySelector("#readyPill");
+    const predictBtn = document.querySelector("#predictBtn");
+    const resultBox = document.querySelector("#resultBox");
+    const message = document.querySelector("#message");
+    const recordForm = document.querySelector("#recordForm");
+
+    const displayLabels = {
+      activity_type: {
+        Basketball: "Баскетбол",
+        Cycling: "Велоспорт",
+        Dancing: "Танцы",
+        HIIT: "Интервальная тренировка",
+        Running: "Бег",
+        Swimming: "Плавание",
+        Tennis: "Теннис",
+        Walking: "Ходьба",
+        "Weight Training": "Силовая тренировка",
+        Yoga: "Йога",
+      },
+      intensity: {
+        Low: "Низкая",
+        Medium: "Средняя",
+        High: "Высокая",
+      },
+      health_condition: {
+        Asthma: "Астма",
+        Diabetes: "Диабет",
+        Hypertension: "Гипертония",
+      },
+      smoking_status: {
+        Never: "Не курит",
+        Former: "Бросил(а)",
+        Current: "Курит",
+      },
+    };
+
+    function labelFor(type, value) {
+      return displayLabels[type][value] || value || "Нет";
+    }
+
+    function showMessage(text, isError = false) {
+      message.textContent = text;
+      message.classList.toggle("error", isError);
+    }
+
+    function selectedStudentId() {
+      return studentSelect.value ? Number(studentSelect.value) : null;
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || "Ошибка запроса");
+      }
+      return data;
+    }
+
+    async function loadStudents() {
+      const students = await api("/api/students");
+      const previous = studentSelect.value;
+      studentSelect.innerHTML = "";
+
+      if (students.length === 0) {
+        studentSelect.innerHTML = "<option value=''>Добавьте студента</option>";
+      } else {
+        for (const student of students) {
+          const option = document.createElement("option");
+          option.value = student.id;
+          option.textContent = `${student.name}${student.group_name ? " (" + student.group_name + ")" : ""}`;
+          studentSelect.appendChild(option);
+        }
+        if (students.some((student) => String(student.id) === previous)) {
+          studentSelect.value = previous;
+        }
+      }
+
+      await refreshStudentData();
+    }
+
+    async function refreshStudentData() {
+      resultBox.style.display = "none";
+      const studentId = selectedStudentId();
+      if (!studentId) {
+        recordsBody.innerHTML = "";
+        statusText.textContent = "Выберите студента";
+        readyPill.textContent = "Нет данных";
+        predictBtn.style.display = "none";
+        return;
+      }
+
+      const [records, status] = await Promise.all([
+        api(`/api/students/${studentId}/records`),
+        api(`/api/students/${studentId}/status`),
+      ]);
+
+      renderRecords(records);
+      statusText.textContent =
+        `Записей: ${status.records_count}. Покрытие: ${status.coverage_days}/${status.required_days} календарных дней.`;
+      readyPill.textContent = status.ready ? "Расчет доступен" : "Недостаточно данных";
+      predictBtn.style.display = status.ready ? "inline-flex" : "none";
+    }
+
+    function renderRecords(records) {
+      if (records.length === 0) {
+        recordsBody.innerHTML = "<tr><td colspan='8'>Записей пока нет</td></tr>";
+        return;
+      }
+
+      recordsBody.innerHTML = records.map((record) => `
+        <tr>
+          <td>${record.date}</td>
+          <td>${labelFor("activity_type", record.activity_type)}</td>
+          <td>${record.duration_minutes}</td>
+          <td>${labelFor("intensity", record.intensity)}</td>
+          <td>${record.daily_steps}</td>
+          <td>${Number(record.weight_kg).toFixed(1)}</td>
+          <td>${Number(record.fitness_level).toFixed(2)}</td>
+          <td><button class="danger" type="button" data-record-id="${record.id}">Удалить</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function formPayload(form) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      const numericFields = [
+        "age", "height_cm", "weight_kg", "duration_minutes", "calories_burned",
+        "avg_heart_rate", "hours_sleep", "stress_level", "daily_steps",
+        "hydration_level", "bmi", "resting_heart_rate", "blood_pressure_systolic",
+        "blood_pressure_diastolic", "fitness_level"
+      ];
+
+      for (const field of numericFields) {
+        data[field] = Number(data[field]);
+      }
+
+      if (!data.health_condition) {
+        data.health_condition = null;
+      }
+
+      return data;
+    }
+
+    document.querySelector("#addStudentBtn").addEventListener("click", async () => {
+      const nameInput = document.querySelector("#newStudentName");
+      const groupInput = document.querySelector("#newStudentGroup");
+      const name = nameInput.value.trim();
+      if (!name) {
+        showMessage("Введите ФИО студента", true);
+        return;
+      }
+
+      try {
+        const created = await api("/api/students", {
+          method: "POST",
+          body: JSON.stringify({ name, group_name: groupInput.value.trim() || null }),
+        });
+        nameInput.value = "";
+        groupInput.value = "";
+        await loadStudents();
+        studentSelect.value = created.id;
+        await refreshStudentData();
+        showMessage("Студент добавлен");
+      } catch (error) {
+        showMessage(error.message, true);
+      }
+    });
+
+    document.querySelector("#deleteStudentBtn").addEventListener("click", async () => {
+      const studentId = selectedStudentId();
+      if (!studentId) return;
+      if (!confirm("Удалить студента и все его записи?")) return;
+
+      try {
+        await api(`/api/students/${studentId}`, { method: "DELETE" });
+        await loadStudents();
+        showMessage("Студент удален");
+      } catch (error) {
+        showMessage(error.message, true);
+      }
+    });
+
+    recordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const studentId = selectedStudentId();
+      if (!studentId) {
+        showMessage("Сначала выберите или добавьте студента", true);
+        return;
+      }
+
+      try {
+        await api(`/api/students/${studentId}/records`, {
+          method: "POST",
+          body: JSON.stringify(formPayload(recordForm)),
+        });
+        await refreshStudentData();
+        showMessage("Запись сохранена");
+      } catch (error) {
+        showMessage(error.message, true);
+      }
+    });
+
+    recordsBody.addEventListener("click", async (event) => {
+      const button = event.target.closest("button[data-record-id]");
+      if (!button) return;
+      const studentId = selectedStudentId();
+      if (!studentId) return;
+
+      try {
+        await api(`/api/students/${studentId}/records/${button.dataset.recordId}`, {
+          method: "DELETE",
+        });
+        await refreshStudentData();
+        showMessage("Запись удалена");
+      } catch (error) {
+        showMessage(error.message, true);
+      }
+    });
+
+    predictBtn.addEventListener("click", async () => {
+      const studentId = selectedStudentId();
+      if (!studentId) return;
+      predictBtn.disabled = true;
+      predictBtn.textContent = "Расчет...";
+      resultBox.style.display = "none";
+
+      try {
+        const result = await api(`/api/students/${studentId}/predict`, { method: "POST" });
+        resultBox.innerHTML = `
+          Модель: ${result.model_used}.
+          Текущий fitness_level: ${Number(result.current_fitness_level).toFixed(2)}.
+          Прогноз изменения за 14 дней: ${Number(result.predicted_delta_14_days).toFixed(3)}.
+          Прогноз fitness_level через 14 дней: ${Number(result.predicted_fitness_level_after_14_days).toFixed(3)}.
+        `;
+        resultBox.style.display = "block";
+        showMessage("Расчет выполнен");
+      } catch (error) {
+        showMessage(error.message, true);
+      } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = "Рассчитать показатель";
+      }
+    });
+
+    document.querySelector("#refreshBtn").addEventListener("click", refreshStudentData);
+    studentSelect.addEventListener("change", refreshStudentData);
+
+    loadStudents().catch((error) => showMessage(error.message, true));
+  </script>
+</body>
+</html>
