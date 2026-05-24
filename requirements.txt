@@ -6,5 +6,7 @@ scikit-learn
 fastapi
 uvicorn[standard]
 joblib
+pytest
+httpx
 torch
 torchvision --index-url https://download.pytorch.org/whl/cu130
