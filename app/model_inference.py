@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = PROJECT_ROOT / "health_fitness_dataset.csv"
-MODEL_PATH = PROJECT_ROOT / "best_lstm.pth"
+MODEL_PATH = PROJECT_ROOT / "model.pth"
 ARTIFACTS_PATH = PROJECT_ROOT / "artifacts" / "lstm_preprocessing.joblib"
 
 USER_COL = "participant_id"
